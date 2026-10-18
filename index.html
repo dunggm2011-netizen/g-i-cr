@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gửi Crush ❤️ | [NΞXUS.DUY]</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & Canvas Confetti -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #030008;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #webgl-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .ui-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .glass-card {
+      background: rgba(18, 6, 28, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 105, 180, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(255, 20, 147, 0.25), inset 0 0 15px rgba(255, 192, 203, 0.15);
+      border-radius: 24px;
+      pointer-events: auto;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .handwritten {
+      font-family: 'Dancing Script', cursive;
+    }
+
+    .glow-text {
+      text-shadow: 0 0 12px rgba(255, 105, 180, 0.8), 0 0 24px rgba(255, 20, 147, 0.6);
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #ff1493, #ff69b4);
+      box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-yes:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 30px rgba(255, 20, 147, 0.9);
+    }
+
+    .btn-no {
+      position: absolute;
+      transition: left 0.2s ease-out, top 0.2s ease-out;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      white-space: nowrap;
+    }
+
+    .music-widget {
+      pointer-events: auto;
+      background: rgba(10, 4, 18, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 105, 180, 0.3);
+    }
+
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .spinning {
+      animation: spin-slow 8s linear infinite;
+    }
+
+    .fade-out {
+      opacity: 0 !important;
+      transform: scale(0.85) translateY(-30px) !important;
+      pointer-events: none !important;
+    }
+
+    .marquee-text {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 10s linear infinite;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL Three.js Canvas -->
+  <div id="webgl-container"></div>
+
+  <!-- UI Interactive Layer -->
+  <div class="ui-layer">
+    
+    <!-- Top Header & Music Controls -->
+    <div class="w-full flex justify-between items-center max-w-4xl pt-2">
+      <div class="text-xs tracking-widest text-pink-300 font-bold opacity-80 uppercase">
+        [NΞXUS.DUY]
+      </div>
+
+      <!-- Music Player Widget -->
+      <div class="music-widget px-4 py-2 rounded-full flex items-center space-x-3 shadow-lg">
+        <div id="diskIcon" class="w-7 h-7 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center spinning">
+          <div class="w-2.5 h-2.5 rounded-full bg-black"></div>
+        </div>
+        <div class="overflow-hidden w-32 text-xs">
+          <div class="marquee-text text-pink-200 font-medium">
+            🎵 MONO - Sandwich & Story • Tự động phát khi chạm
+          </div>
+        </div>
+        <button id="toggleAudio" class="text-pink-300 hover:text-white text-sm font-bold focus:outline-none">
+          🔊
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Love Proposal Card -->
+    <div id="mainCard" class="glass-card p-6 md:p-8 max-w-lg w-full text-center relative my-auto">
+      <h1 class="text-3xl md:text-4xl handwritten text-pink-300 font-bold mb-3 glow-text">
+        Gửi NGỌC, Người Tớ Thích ❤️
+      </h1>
+      
+      <div id="typewriterText" class="text-sm md:text-base text-gray-200 min-h-[90px] leading-relaxed mb-6 font-light">
+        <!-- Text typed by JS -->
+      </div>
+
+      <!-- Action Area: Buttons inside card boundaries -->
+      <div id="actionArea" class="relative w-full h-16 flex items-center justify-center">
+        <button id="btnYes" class="btn-yes text-white font-bold px-8 py-3 rounded-full text-base tracking-wide z-10">
+          Đồng ý ❤️
+        </button>
+        
+        <button id="btnNo" class="btn-no text-gray-300 font-medium px-6 py-2.5 rounded-full text-sm z-10">
+          Không nha 😜
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Romantic Banner (Appears after YES) -->
+    <div id="acceptedMessage" class="text-center pb-6 opacity-0 transition-opacity duration-1000 pointer-events-none">
+      <h2 class="text-2xl md:text-3xl handwritten text-pink-200 glow-text mb-1">
+        Cảm ơn cậu vì đã đồng ý! 💞✨
+      </h2>
+      <p class="text-xs text-pink-300/80 uppercase tracking-widest font-semibold">
+        [NΞXUS.DUY] • Forever With You
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Audio Element (MONO - music.mp3) -->
+  <audio id="bgMusic" loop src="mono.mp3" preload="auto"></audio>
+
+  <script>
+    // --- 1. AUDIO SYSTEM & AUTOPLAY TRIGGER ---
+    const bgMusic = document.getElementById('bgMusic');
+    const toggleAudioBtn = document.getElementById('toggleAudio');
+    const diskIcon = document.getElementById('diskIcon');
+    let isPlaying = false;
+
+    function playAudio() {
+      bgMusic.play().then(() => {
+        isPlaying = true;
+        toggleAudioBtn.innerText = '🔊';
+        diskIcon.classList.add('spinning');
+      }).catch(err => {
+        console.log("Waiting for user interaction for audio autoplay...");
+      });
+    }
+
+    function toggleAudio() {
+      if (isPlaying) {
+        bgMusic.pause();
+        isPlaying = false;
+        toggleAudioBtn.innerText = '🔇';
+        diskIcon.classList.remove('spinning');
+      } else {
+        playAudio();
+      }
+    }
+
+    toggleAudioBtn.addEventListener('click', toggleAudio);
+
+    ['click', 'touchstart', 'mousemove', 'keydown'].forEach(evt => {
+      window.addEventListener(evt, () => {
+        if (!isPlaying) playAudio();
+      }, { once: true });
+    });
+
+    // --- 2. TYPEWRITER EFFECT ---
+    const loveLetter = "Tớ đã dành hàng ngàn hạt ánh sáng này để chờ cậu. Cậu có đồng ý mở lối cho trái tim tớ không? ✨💞";
+    const typewriterEl = document.getElementById('typewriterText');
+    let charIdx = 0;
+
+    function typeEffect() {
+      if (charIdx < loveLetter.length) {
+        typewriterEl.innerHTML += loveLetter.charAt(charIdx);
+        charIdx++;
+        setTimeout(typeEffect, 45);
+      }
+    }
+    setTimeout(typeEffect, 600);
+
+    // --- 3. EVASIVE "NO" BUTTON (Restricted inside Card) ---
+    const btnNo = document.getElementById('btnNo');
+    const btnYes = document.getElementById('btnYes');
+    const actionArea = document.getElementById('actionArea');
+
+    function resetNoPosition() {
+      const yesRect = btnYes.getBoundingClientRect();
+      const areaRect = actionArea.getBoundingClientRect();
+      // Position NO button next to YES button initially
+      btnNo.style.left = `${yesRect.right - areaRect.left + 20}px`;
+      btnNo.style.top = `${yesRect.top - areaRect.top}px`;
+    }
+
+    window.addEventListener('load', resetNoPosition);
+
+    function moveNoButton() {
+      const areaRect = actionArea.getBoundingClientRect();
+      const yesRect = btnYes.getBoundingClientRect();
+      const btnRect = btnNo.getBoundingClientRect();
+
+      let newX, newY, distToYes;
+
+      // Ensure new random position stays INSIDE actionArea and away from YES
+      do {
+        newX = Math.random() * (areaRect.width - btnRect.width);
+        newY = (Math.random() - 0.5) * 120; // Allow slight vertical shift inside card
+
+        const absX = areaRect.left + newX + btnRect.width / 2;
+        const absY = areaRect.top + newY + btnRect.height / 2;
+        const yesX = yesRect.left + yesRect.width / 2;
+        const yesY = yesRect.top + yesRect.height / 2;
+
+        distToYes = Math.hypot(absX - yesX, absY - yesY);
+      } while (distToYes < 90);
+
+      btnNo.style.left = `${newX}px`;
+      btnNo.style.top = `${newY}px`;
+    }
+
+    btnNo.addEventListener('mouseenter', moveNoButton);
+    btnNo.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    // --- 4. PROPOSAL ACCEPTANCE & HEART ASSEMBLY TRIGGER ---
+    const mainCard = document.getElementById('mainCard');
+    const acceptedMessage = document.getElementById('acceptedMessage');
+    let isAccepted = false;
+
+    btnYes.addEventListener('click', () => {
+      isAccepted = true; // Triggers heart formation in Three.js animation loop
+      mainCard.classList.add('fade-out');
+      
+      setTimeout(() => {
+        acceptedMessage.classList.remove('opacity-0');
+        acceptedMessage.classList.add('opacity-100');
+      }, 500);
+
+      // Fireworks Confetti Explosions
+      const duration = 4 * 1000;
+      const animationEnd = Date.now() + duration;
+
+      (function frame() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return;
+
+        confetti({
+          particleCount: 6,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0 },
+          colors: ['#ff1493', '#ff69b4', '#ffffff', '#ffb6c1']
+        });
+        confetti({
+          particleCount: 6,
+          angle: 120,
+          spread: 60,
+          origin: { x: 1 },
+          colors: ['#ff1493', '#ff69b4', '#ffffff', '#ffb6c1']
+        });
+
+        requestAnimationFrame(frame);
+      }());
+    });
+
+    // --- 5. THREE.JS 3D PARTICLE SYSTEM ---
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 28;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    function createGlowTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(0.2, 'rgba(255, 105, 180, 0.9)');
+      gradient.addColorStop(0.5, 'rgba(255, 20, 147, 0.4)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+
+      const texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    const PARTICLE_COUNT = 25000;
+    const geometry = new THREE.BufferGeometry();
+    const currentPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const targetHeartPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const initialDispersedPositions = new Float32Array(PARTICLE_COUNT * 3);
+    const phases = new Float32Array(PARTICLE_COUNT);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      // Parametric Heart Formula
+      let t = Math.PI * (Math.random() * 2 - 1);
+      let u = Math.PI * (Math.random() - 0.5);
+
+      let x = 16 * Math.pow(Math.sin(t), 3);
+      let y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+      let z = u * 6 * Math.sin(t);
+
+      const scale = 0.55 + Math.random() * 0.08;
+      x *= scale;
+      y *= scale;
+      z *= scale;
+
+      targetHeartPositions[i * 3] = x;
+      targetHeartPositions[i * 3 + 1] = y;
+      targetHeartPositions[i * 3 + 2] = z;
+
+      // Initial scattered cosmic star positions
+      const radius = 25 + Math.random() * 70;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI - Math.PI / 2;
+
+      const initX = radius * Math.cos(phi) * Math.cos(theta);
+      const initY = radius * Math.cos(phi) * Math.sin(theta);
+      const initZ = radius * Math.sin(phi);
+
+      initialDispersedPositions[i * 3] = initX;
+      initialDispersedPositions[i * 3 + 1] = initY;
+      initialDispersedPositions[i * 3 + 2] = initZ;
+
+      currentPositions[i * 3] = initX;
+      currentPositions[i * 3 + 1] = initY;
+      currentPositions[i * 3 + 2] = initZ;
+
+      phases[i] = Math.random() * Math.PI * 2;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(currentPositions, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 0.55,
+      map: createGlowTexture(),
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthWrite: false,
+      color: new THREE.Color('#ff69b4')
+    });
+
+    const heartParticles = new THREE.Points(geometry, material);
+    scene.add(heartParticles);
+
+    // Background Stars
+    const STAR_COUNT = 1500;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(STAR_COUNT * 3);
+
+    for (let i = 0; i < STAR_COUNT * 3; i++) {
+      starPos[i] = (Math.random() - 0.5) * 160;
+    }
+
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({
+      size: 0.3,
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.5
+    });
+
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // Orbit Controls
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    window.addEventListener('mousedown', () => isDragging = true);
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaMove = {
+          x: e.clientX - previousMousePosition.x,
+          y: e.clientY - previousMousePosition.y
+        };
+
+        heartParticles.rotation.y += deltaMove.x * 0.005;
+        heartParticles.rotation.x += deltaMove.y * 0.005;
+      }
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+    window.addEventListener('touchend', () => isDragging = false);
+    window.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const deltaMove = {
+          x: e.touches[0].clientX - previousMousePosition.x,
+          y: e.touches[0].clientY - previousMousePosition.y
+        };
+
+        heartParticles.rotation.y += deltaMove.x * 0.005;
+        heartParticles.rotation.x += deltaMove.y * 0.005;
+      }
+      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+
+    // --- 6. ANIMATION LOOP ---
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const elapsedTime = clock.getElapsedTime();
+      const positions = heartParticles.geometry.attributes.position.array;
+      const beatScale = 1 + Math.sin(elapsedTime * 3.5) * 0.04 + Math.pow(Math.sin(elapsedTime * 7), 2) * 0.02;
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const i3 = i * 3;
+
+        const floatX = Math.sin(elapsedTime * 1.5 + phases[i]) * 0.15;
+        const floatY = Math.cos(elapsedTime * 2.0 + phases[i]) * 0.15;
+        const floatZ = Math.sin(elapsedTime * 1.8 + phases[i]) * 0.15;
+
+        let tx, ty, tz;
+
+        if (isAccepted) {
+          // CONVERGE INTO HEART WHEN YES IS CLICKED
+          tx = (targetHeartPositions[i3] + floatX) * beatScale;
+          ty = (targetHeartPositions[i3 + 1] + floatY) * beatScale;
+          tz = (targetHeartPositions[i3 + 2] + floatZ) * beatScale;
+
+          // Smooth fast convergence lerp
+          positions[i3] += (tx - positions[i3]) * 0.04;
+          positions[i3 + 1] += (ty - positions[i3 + 1]) * 0.04;
+          positions[i3 + 2] += (tz - positions[i3 + 2]) * 0.04;
+        } else {
+          // DISPERSED DRIFTING BEFORE YES
+          tx = initialDispersedPositions[i3] + Math.sin(elapsedTime + phases[i]) * 1.5;
+          ty = initialDispersedPositions[i3 + 1] + Math.cos(elapsedTime + phases[i]) * 1.5;
+          tz = initialDispersedPositions[i3 + 2] + Math.sin(elapsedTime * 0.5 + phases[i]) * 1.5;
+
+          positions[i3] += (tx - positions[i3]) * 0.02;
+          positions[i3 + 1] += (ty - positions[i3 + 1]) * 0.02;
+          positions[i3 + 2] += (tz - positions[i3 + 2]) * 0.02;
+        }
+      }
+
+      heartParticles.geometry.attributes.position.needsUpdate = true;
+
+      if (!isDragging) {
+        heartParticles.rotation.y += isAccepted ? 0.005 : 0.001;
+      }
+
+      starField.rotation.y += 0.0005;
+
+      if (isAccepted) {
+        heartParticles.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.03);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      resetNoPosition();
+    });
+  </script>
+</body>
+</html>
+
